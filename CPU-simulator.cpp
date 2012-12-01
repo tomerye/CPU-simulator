@@ -276,7 +276,7 @@ void StartSimulator()
 			r0=GetRegNumberFromString(current_instruction[2]);
 			res=GetOffset(current_instruction[3]);
 			r1=GetRegNumberFromString(current_instruction[3].substr(current_instruction[3].find_first_of(")"),std::string::npos));
-			reg[r0]=ram[reg[r1]+res];
+			reg[r0]=ram[reg[r1]/4+res/4];
 			pc++;
 			continue;
 		}
@@ -285,7 +285,7 @@ void StartSimulator()
 			r0=GetRegNumberFromString(current_instruction[2]);
 			res=GetOffset(current_instruction[3]);
 			r1=GetRegNumberFromString(current_instruction[3].substr(current_instruction[3].find_first_of(")")+1,std::string::npos));
-			ram[reg[r1]+res]=reg[r0];
+			ram[reg[r1]/4+res/4]=reg[r0];
 			pc++;
 			continue;
 		}
@@ -415,17 +415,20 @@ int WriteMemoryDumpToFile(char *file_name)
 
 	for(i=0;i<MEMORY_SIZE;i++)
 	{
-		fprintf(file,"%02X ",(ram[1]>>24)&0xFF);
-		fprintf(file,"%02X ",(ram[1]>>16)&0xFF);
-		fprintf(file,"%02X ",(ram[1]>>8)&0xFF);
+		fprintf(file,"%02x ",ram[i]&0xFF);
+		fprintf(file,"%02x ",(ram[i]>>8)&0xFF);
+		fprintf(file,"%02x ",(ram[i]>>16)&0xFF);
+		
+		
+		
 		if((i!=0)&&(i%2!=0))
 		{
-			fprintf(file,"%02X",ram[1]&0xFF);
+			fprintf(file,"%02x",(ram[i]>>24)&0xFF);
 			fprintf(file,"\n");
 		}
 		else
 		{
-			fprintf(file,"%02X ",ram[1]&0xFF);
+			fprintf(file,"%02x ",(ram[i]>>24)&0xFF);
 		}
 	}
 

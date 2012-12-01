@@ -1,4 +1,4 @@
-﻿Build started 12/1/2012 7:19:56 PM.
+﻿Build started 12/1/2012 9:06:24 PM.
      1>Project "D:\this semester\architecture\CPU-simulator\CPU-simulator\CPU-simulator.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\CPU-simulator.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -17,13 +17,13 @@
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdio.h(234) : see declaration of 'fopen'
      1>d:\this semester\architecture\cpu-simulator\cpu-simulator\cpu-simulator.cpp(407): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdio.h(234) : see declaration of 'fopen'
-     1>d:\this semester\architecture\cpu-simulator\cpu-simulator\cpu-simulator.cpp(439): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>d:\this semester\architecture\cpu-simulator\cpu-simulator\cpu-simulator.cpp(442): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdio.h(234) : see declaration of 'fopen'
-     1>d:\this semester\architecture\cpu-simulator\cpu-simulator\cpu-simulator.cpp(455): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>d:\this semester\architecture\cpu-simulator\cpu-simulator\cpu-simulator.cpp(458): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdio.h(325) : see declaration of 'sscanf'
-     1>d:\this semester\architecture\cpu-simulator\cpu-simulator\cpu-simulator.cpp(471): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>d:\this semester\architecture\cpu-simulator\cpu-simulator\cpu-simulator.cpp(474): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdio.h(234) : see declaration of 'fopen'
-     1>d:\this semester\architecture\cpu-simulator\cpu-simulator\cpu-simulator.cpp(498): warning C4101: 'result' : unreferenced local variable
+     1>d:\this semester\architecture\cpu-simulator\cpu-simulator\cpu-simulator.cpp(501): warning C4101: 'result' : unreferenced local variable
        ManifestResourceCompile:
          All outputs are up-to-date.
        Link:
@@ -44,4 +44,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.80
+Time Elapsed 00:00:01.48
