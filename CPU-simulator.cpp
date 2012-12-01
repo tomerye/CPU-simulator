@@ -161,6 +161,9 @@ void StartSimulator()
 {
 	std::vector<std::string> current_instruction;
 	int r0,r1,r2,res;
+
+	reg[0]=0;//make reg 0 alwayes 0
+
 	while(1)
 	{
 		current_instruction=commands_vector[pc];
