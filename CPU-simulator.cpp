@@ -19,6 +19,9 @@ int ram[MEMORY_SIZE];
 int reg[NUMBER_OF_REGISTERS];
 
 
+int instructioncount;
+int executetime;
+
 int _tmain(int argc, char* argv[])
 {
 
@@ -28,13 +31,13 @@ int _tmain(int argc, char* argv[])
 	int i;
 
 
-	if(argc!=2)
+	if(argc!=8)
 	{
 		printf("Wronge command line arguments number!\n");
 		exit(1);
 	}
 
-	if (ini_parse(argv[1], handler, &configuration) < 0) {
+	if (ini_parse(argv[2], handler, &configuration) < 0) {
 		printf("Can't load '%s' file\n",argv[1]);
 		exit(1);
 	}
@@ -49,7 +52,9 @@ int _tmain(int argc, char* argv[])
 
 	WriteRegisterDumpToFile(argv[4]);
 
+	WriteExceutionTime(argv[6]);
 
+	WriteInstructionCount(argv[7]);
 
 	//	printf("%d",configuration.l1_cache_size);
 
@@ -57,6 +62,43 @@ int _tmain(int argc, char* argv[])
 
 	return 0;
 
+
+}
+
+
+void WriteExceutionTime(char *file_name)
+{
+	FILE *file=fopen(file_name,"w");
+	int i;
+
+	if (file==NULL)
+	{
+		printf("error in write execution time\n %s %s ",__FILE__,__LINE__);
+		exit(1);
+	}
+
+	fprintf(file,"%d",executetime);
+
+	fclose(file);
+	return;
+}
+
+
+void WriteInstructionCount(char *file_name)
+{
+	FILE *file=fopen(file_name,"w");
+	int i;
+
+	if (file==NULL)
+	{
+		printf("error in write instruction count file\n %s %s ",__FILE__,__LINE__);
+		exit(1);
+	}
+
+	fprintf(file,"%d",instructioncount);
+
+	fclose(file);
+	return;
 
 }
 
@@ -73,23 +115,44 @@ int GetRegNumberFromString(std::string reg)
 	return atoi(reg.c_str()+1);//convert to int after the $ sign
 }
 
-
+/*
 int MyAtoi(std::string s)
 {
-	int res=atoi(s.c_str());
-	if(res)
+int res=atoi(s.c_str());
+if(!res)
+{
+printf("error in instruction at function MyAtoi pc=%d\n",pc);
+exit(1);
+}
+
+return res;
+}
+*/
+
+
+
+int MyAtoi(std::string str)
+{
+	const char *number = str.c_str();
+
+	char *end;
+	long value = strtol(number, &end, 10); 
+	if (end == number || *end != '\0' || errno == ERANGE)
 	{
 		printf("error in instruction at function MyAtoi pc=%d\n",pc);
 		exit(1);
 	}
-
-	return res;
+	return value;
 }
+
 
 
 int GetOffset(std::string s)
 {
-	std::string tmp=s.substr(s.find_first_of("(",0),s.find_first_of(")"));
+	size_t start,end;
+	start=s.find_first_of("(",0)+1;
+	end=s.find_first_of(")");
+	std::string tmp=s.substr(start,end-start);
 	return MyAtoi(tmp);
 }
 
@@ -101,6 +164,8 @@ void StartSimulator()
 	while(1)
 	{
 		current_instruction=commands_vector[pc];
+		executetime++;
+		instructioncount++;
 		if(current_instruction[1]=="halt")
 			return;
 		if(current_instruction[1]=="j")
@@ -219,7 +284,7 @@ void StartSimulator()
 		{
 			r0=GetRegNumberFromString(current_instruction[2]);
 			res=GetOffset(current_instruction[3]);
-			r1=GetRegNumberFromString(current_instruction[3].substr(current_instruction[3].find_first_of(")"),std::string::npos));
+			r1=GetRegNumberFromString(current_instruction[3].substr(current_instruction[3].find_first_of(")")+1,std::string::npos));
 			ram[reg[r1]+res]=reg[r0];
 			pc++;
 			continue;
@@ -350,10 +415,18 @@ int WriteMemoryDumpToFile(char *file_name)
 
 	for(i=0;i<MEMORY_SIZE;i++)
 	{
-		if(i%8==0)
-			fprintf(file,"%X ",ram[i]);
-		else
+		fprintf(file,"%02X ",(ram[1]>>24)&0xFF);
+		fprintf(file,"%02X ",(ram[1]>>16)&0xFF);
+		fprintf(file,"%02X ",(ram[1]>>8)&0xFF);
+		if((i!=0)&&(i%2!=0))
+		{
+			fprintf(file,"%02X",ram[1]&0xFF);
 			fprintf(file,"\n");
+		}
+		else
+		{
+			fprintf(file,"%02X ",ram[1]&0xFF);
+		}
 	}
 
 	fclose(file);
@@ -363,7 +436,7 @@ int WriteMemoryDumpToFile(char *file_name)
 
 void ReadMemInitFile(char *file_name)
 {
-	FILE *file=fopen(file_name,"w");
+	FILE *file=fopen(file_name,"r");
 	char lineBuffer[MAX_LINE_SIZE];
 	int status;
 	int x[8];
@@ -395,7 +468,7 @@ void ReadMemInitFile(char *file_name)
 
 int ParseCMDfile(char *file_name)
 {
-	FILE *file=fopen(file_name,"w");
+	FILE *file=fopen(file_name,"r");
 	char lineBuffer[MAX_LINE_SIZE];
 
 	if (file==NULL)
@@ -406,6 +479,7 @@ int ParseCMDfile(char *file_name)
 
 	while ( fgets ( lineBuffer, sizeof lineBuffer, file ) != NULL ) 
 	{
+		lineBuffer[strlen(lineBuffer)-1]='\0';
 		ParseLine(lineBuffer);
 	}
 
@@ -423,7 +497,7 @@ void ParseLine(char *lineBuffer)
 	std::vector<std::string> instruction;
 	int result;
 	size_t start=0,end=0;
-
+	tmp.append("#");//mark end of line
 	if(tmp.find_first_of(':',0)==std::string::npos)//regular line
 	{
 		instruction.push_back("#");
@@ -435,13 +509,29 @@ void ParseLine(char *lineBuffer)
 		instruction.push_back(cmd);
 		lables_map[cmd]=instruction_counter;
 	}
-	start=tmp.find_first_not_of(" \t",0);
-	end=tmp.find_first_of(" \,\t\r\n",start);
-	while(start!=std::string::npos){
+	start=tmp.find_first_not_of(" \t:",end);
+	end=tmp.find_first_of(" ,\t\r\n#",start);
+
+	bool flag=true;
+	if(tmp.at(end)=='#')
+	{
 		cmd=tmp.substr(start,end-start);
 		instruction.push_back(cmd);
-		start=tmp.find_first_not_of(" \,\t",end);
-		end=tmp.find_first_of(" \,\t\r\n",start);
+		flag=false;
+	}
+
+	while(/*start!=std::string::npos*/ flag){
+		cmd=tmp.substr(start,end-start);
+		instruction.push_back(cmd);
+		start=tmp.find_first_not_of(" ,\t",end);
+		end=tmp.find_first_of(" ,\t\r\n#",start);
+		//		std::cout <<"^^"<<tmp<<"^^"<<"%%" << tmp.at(end) <<"%%" << std::endl;
+		if(tmp.at(end)=='#')
+		{
+			cmd=tmp.substr(start,end-start);
+			instruction.push_back(cmd);
+			break;
+		}
 	}
 	instruction_counter++;
 	commands_vector.push_back(instruction);

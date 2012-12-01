@@ -48,11 +48,14 @@ int ParseCMDfile(char *file_name);
 static int handler(void* user, const char* section, const char* name,const char* value);
 void ParseLine(char *lineBuffer);
 int GetRegNumberFromString(std::string reg);
-int MyAtoi(std::string s);
+template< typename T >
+T MyAtoi(std::string str);
 int GetOffset(std::string s);
 void StartSimulator();
 void ReadMemInitFile(char *file_name);
+void WriteExceutionTime(char *file_name);
 
+void WriteInstructionCount(char *file_name);
 
 class MyClass
 {
