@@ -9,17 +9,22 @@
 #include "ini.h"
 #include <string.h>
 
-
+//this is vector of vector thar contain the cmd line that been parsed.
 std::vector<std::vector<std::string> > commands_vector;
-int instruction_counter;
+//this var contain the number of line beeing parsed during the read of the cmd file
+int line_counter;
+//this is map that contain the label and the the line it was found
 std::map<std::string,int> lables_map;
-
+//pc register
 int pc=0;
+//the ram
 int ram[MEMORY_SIZE];
+//the registes
 int reg[NUMBER_OF_REGISTERS];
 
-
+//counter for the instructing that was exceuted
 int instructioncount;
+//counter for the excution time
 int executetime;
 
 int _tmain(int argc, char* argv[])
@@ -48,6 +53,8 @@ int _tmain(int argc, char* argv[])
 
 	StartSimulator();
 
+	printf("simulation done!\n");
+
 	WriteMemoryDumpToFile(argv[5]);
 
 	WriteRegisterDumpToFile(argv[4]);
@@ -56,9 +63,7 @@ int _tmain(int argc, char* argv[])
 
 	WriteInstructionCount(argv[7]);
 
-	//	printf("%d",configuration.l1_cache_size);
-
-
+	printf("all results written to files!\n");
 
 	return 0;
 
@@ -103,7 +108,7 @@ void WriteInstructionCount(char *file_name)
 }
 
 
-//for string $1 return int 1
+//for string "$1" return int 1
 int GetRegNumberFromString(std::string reg)
 {
 	if(reg.at(0)!='$')	
@@ -115,19 +120,6 @@ int GetRegNumberFromString(std::string reg)
 	return atoi(reg.c_str()+1);//convert to int after the $ sign
 }
 
-/*
-int MyAtoi(std::string s)
-{
-int res=atoi(s.c_str());
-if(!res)
-{
-printf("error in instruction at function MyAtoi pc=%d\n",pc);
-exit(1);
-}
-
-return res;
-}
-*/
 
 
 
@@ -146,7 +138,7 @@ int MyAtoi(std::string str)
 }
 
 
-
+//return the strnig that in "(" ")" as int
 int GetOffset(std::string s)
 {
 	size_t start,end;
@@ -465,8 +457,8 @@ void ReadMemInitFile(char *file_name)
 			exit(1);
 		}
 
-		ram[i]=x[0]+x[1]+x[2]+x[3];
-		ram[i+1]=x[4]+x[5]+x[6]+x[7];
+		ram[i]=x[0]+x[1]<<8+x[2]<<16+x[3]<<24;
+		ram[i+1]=x[4]+x[5]<<8+x[6]<<16+x[7]<<24;
 		i+=2;
 	}
 
@@ -513,7 +505,7 @@ void ParseLine(char *lineBuffer)
 		end=tmp.find_first_of(":",0);
 		cmd=tmp.substr(start,end-start);
 		instruction.push_back(cmd);
-		lables_map[cmd]=instruction_counter;
+		lables_map[cmd]=line_counter;
 	}
 	start=tmp.find_first_not_of(" \t:",end);
 	end=tmp.find_first_of(" ,\t\r\n#",start);
@@ -539,7 +531,7 @@ void ParseLine(char *lineBuffer)
 			break;
 		}
 	}
-	instruction_counter++;
+	line_counter++;
 	commands_vector.push_back(instruction);
 }
 

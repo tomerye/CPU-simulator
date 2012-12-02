@@ -10,7 +10,7 @@
 
 
 //struct that contain the ini file parameters
-typedef struct ConfigurationStruk_
+typedef struct ConfigurationStruct_
 {
 	int addsub_delay;
 	int mul_delay;
@@ -32,36 +32,38 @@ typedef struct ConfigurationStruk_
 
 } ConfigurationStruct;
 
+
 #define	NUMBER_OF_REGISTERS 32
 
 #define MEMORY_SIZE 65536
 
-
 #define MAX_LINE_SIZE 50
 
-void ReadInitMemory(char *file_name);
+
+//write registers value to file
 int WriteRegisterDumpToFile(char *file_name);
+//write memory value to file
 int WriteMemoryDumpToFile(char *file_name);
-int WriteExcTimeToFile(char *file_name, int time);
-int WriteExcCommandNumberToFile(char *file_name, int command_number);
+//read each line from the cmd file and send it to ParseLine function to do the actual parsing
 int ParseCMDfile(char *file_name);
+//this function is from the library we used to parse the config file
 static int handler(void* user, const char* section, const char* name,const char* value);
+//this function parse the cmd line and store the output in global vector
 void ParseLine(char *lineBuffer);
+//help function for the line parsing
 int GetRegNumberFromString(std::string reg);
-template< typename T >
-T MyAtoi(std::string str);
+//convert int to string (include 0) 
+int MyAtoi(std::string str);
+////help function for the line parsing
 int GetOffset(std::string s);
+//do the simulation
 void StartSimulator();
+////read the file that contain the initicial memmory
 void ReadMemInitFile(char *file_name);
+//write excecution time to file
 void WriteExceutionTime(char *file_name);
-
+//write the totlal insctruction that excecute during the simulation
 void WriteInstructionCount(char *file_name);
-
-class MyClass
-{
-public:
-	void testClass(){std::cout << "teeeet";}
-};
 
 
 
