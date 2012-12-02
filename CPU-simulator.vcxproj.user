@@ -5,7 +5,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LocalDebuggerCommandArguments>cmd_file.txt config_file.txt mem_init.txt regs_dump.txt mem_dump.txt time.txt committed.txt</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>"D:\this semester\architecture\CPU-simulator\Debug\cmd_file.txt" "D:\this semester\architecture\CPU-simulator\Debug\config_file.txt" "D:\this semester\architecture\CPU-simulator\Debug\mem_init.txt" "D:\this semester\architecture\CPU-simulator\Debug\regs_dump.txt" "D:\this semester\architecture\CPU-simulator\Debug\mem_dump.txt" "D:\this semester\architecture\CPU-simulator\Debug\time.txt" "D:\this semester\architecture\CPU-simulator\Debug\committed.txt"</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>
