@@ -496,11 +496,11 @@ void ParseLine(char *lineBuffer)
 	int result;
 	size_t start=0,end=0;
 	tmp.append("#");//mark end of line
-	if(tmp.find_first_of(':',0)==std::string::npos)//regular line
+	if(tmp.find_first_of(':',0)==std::string::npos)//regular line start with #
 	{
 		instruction.push_back("#");
 	}
-	else// lable line
+	else// lable line start ith the label
 	{
 		end=tmp.find_first_of(":",0);
 		cmd=tmp.substr(start,end-start);
