@@ -290,8 +290,6 @@ void StartSimulator()
 	}
 }
 
-
-
 //private function used by ini_parse
 static int handler(void* user, const char* section, const char* name,
 	const char* value)
