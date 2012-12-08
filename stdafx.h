@@ -9,7 +9,13 @@
 
 #include <stdio.h>
 #include <tchar.h>
+#include <stdlib.h>
+#include <string.h>
 
+
+#include "Cache.h"
+#include "CPU-simulator.h"
+#include "ini.h"
 
 
 // TODO: reference additional headers your program requires here

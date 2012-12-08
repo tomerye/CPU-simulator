@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>"D:\this semester\architecture\CPU-simulator\Debug\cmd_file.txt" "D:\this semester\architecture\CPU-simulator\Debug\config_file.txt" "D:\this semester\architecture\CPU-simulator\Debug\mem_init.txt" "D:\this semester\architecture\CPU-simulator\Debug\regs_dump.txt" "D:\this semester\architecture\CPU-simulator\Debug\mem_dump.txt" "D:\this semester\architecture\CPU-simulator\Debug\time.txt" "D:\this semester\architecture\CPU-simulator\Debug\commited.txt"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>cmd_file.txt config_file.txt mem_init.txt regs_dump.txt mem_dump.txt time.txt committed.txt hitrate.txt L1i.txt L1d.txt L2i.txt L2d.txt</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LocalDebuggerCommandArguments>"D:\this semester\architecture\CPU-simulator\Debug\cmd_file.txt" "D:\this semester\architecture\CPU-simulator\Debug\config_file.txt" "D:\this semester\architecture\CPU-simulator\Debug\mem_init.txt" "D:\this semester\architecture\CPU-simulator\Debug\regs_dump.txt" "D:\this semester\architecture\CPU-simulator\Debug\mem_dump.txt" "D:\this semester\architecture\CPU-simulator\Debug\time.txt" "D:\this semester\architecture\CPU-simulator\Debug\committed.txt"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>cmd_file.txt config_file.txt mem_init.txt regs_dump.txt mem_dump.txt time.txt committed.txt hitrate.txt L1i.txt L1d.txt L2i.txt L2d.txt</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>
