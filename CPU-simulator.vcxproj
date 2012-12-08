@@ -77,12 +77,14 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Cache.h" />
     <ClInclude Include="CPU-simulator.h" />
     <ClInclude Include="ini.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Cache.cpp" />
     <ClCompile Include="CPU-simulator.cpp" />
     <ClCompile Include="ini.cpp" />
     <ClCompile Include="stdafx.cpp">

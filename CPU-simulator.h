@@ -32,7 +32,6 @@ typedef struct ConfigurationStruct_
 
 } ConfigurationStruct;
 
-
 #define	NUMBER_OF_REGISTERS 32
 
 #define MEMORY_SIZE 65536
@@ -64,6 +63,7 @@ void ReadMemInitFile(char *file_name);
 void WriteExceutionTime(char *file_name);
 //write the totlal insctruction that excecute during the simulation
 void WriteInstructionCount(char *file_name);
+
 
 
 

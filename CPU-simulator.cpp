@@ -3,14 +3,10 @@
 //
 
 #include "stdafx.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include "CPU-simulator.h"
-#include "ini.h"
-#include <string.h>
+
 
 //this is vector of vector thar contain the cmd line that been parsed.
-std::vector<std::vector<std::string> > commands_vector;
+std::vector<std::vector<std::string>> commands_vector;
 //this var contain the number of line beeing parsed during the read of the cmd file
 int line_counter;
 //this is map that contain the label and the the line it was found
@@ -19,26 +15,21 @@ std::map<std::string,int> lables_map;
 int pc=0;
 //the ram
 int ram[MEMORY_SIZE];
-//the registes
+//the registers
 int reg[NUMBER_OF_REGISTERS];
 
 //counter for the instructing that was exceuted
 int instructioncount;
 //counter for the excution time
 int executetime;
-
+//cmd_file.txt config_file.txt mem_init.txt regs_dump.txt mem_dump.txt time.txt committed.txt hitrate.txt L1i.txt L1d.txt L2i.txt L2d.txt
 int _tmain(int argc, char* argv[])
 {
-
 	ConfigurationStruct configuration;
 
-	int tmp=10;
-	int i;
-
-
-	if(argc!=8)
+	if(argc!=13)
 	{
-		printf("Wronge command line arguments number!\n");
+		printf("Wrong number of command line arguments!\n");
 		exit(1);
 	}
 
@@ -51,6 +42,8 @@ int _tmain(int argc, char* argv[])
 
 	ParseCMDfile(argv[1]);
 
+	InitCaches(&configuration);
+	
 	StartSimulator();
 
 	printf("simulation done!\n");
@@ -66,15 +59,11 @@ int _tmain(int argc, char* argv[])
 	printf("all results written to files!\n");
 
 	return 0;
-
-
 }
-
 
 void WriteExceutionTime(char *file_name)
 {
 	FILE *file=fopen(file_name,"w");
-	int i;
 
 	if (file==NULL)
 	{
@@ -92,7 +81,6 @@ void WriteExceutionTime(char *file_name)
 void WriteInstructionCount(char *file_name)
 {
 	FILE *file=fopen(file_name,"w");
-	int i;
 
 	if (file==NULL)
 	{
@@ -159,6 +147,7 @@ void StartSimulator()
 	while(1)
 	{
 		current_instruction=commands_vector[pc];
+		
 		executetime++;
 		instructioncount++;
 		if(current_instruction[1]=="halt")
