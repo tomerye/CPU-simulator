@@ -56,9 +56,21 @@ int FetchWordL1(int address,int* word)
 
 int FetchWordL2(int address,int* word, int associativity)
 {
+	int offset = GetOffset(address,l2Cache.blockSize,l2Cache.cacheLength);
 	int tag = GetAddressTag(address,l2Cache.blockSize,l2Cache.cacheLength);
 	int entryNum = GetCacheEntryNumber(address,l2Cache.blockSize,l2Cache.cacheLength);
-
+	int wasFound = -1;
+	for (int i = 0; i < associativity; i++) {
+		l2Cache.cache[entryNum][i].lru = 0;
+		if (l2Cache.cache[entryNum][i].valid && l2Cache.cache[entryNum][i].tag == tag) {
+			*word = l2Cache.cache[entryNum][i].block[offset];
+			l2Cache.cache[entryNum][i].lru = 1;
+			wasFound = i;
+		}
+	}
+	if (wasFound==-1) {
+		FetchBlockFromDisk(
+	}
 }
 
 

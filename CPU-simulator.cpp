@@ -472,9 +472,6 @@ int ParseCMDfile(char *file_name)
 	return 1;
 }
 
-
-
-
 void ParseLine(char *lineBuffer)
 {
 	std::string tmp(lineBuffer);
