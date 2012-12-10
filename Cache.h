@@ -6,9 +6,16 @@
 #define ASSOCIATIVITY 2
 
 typedef struct {
+	int wordStartedOn;
+	int wordsGotten;
+} BlockState;
+
+typedef struct {
 	int valid;
 	int tag;
+	int isLoading;
 	int* block;
+	BlockState blockState;
 } DirectMappedCacheEntry;
 
 typedef struct {
@@ -16,7 +23,9 @@ typedef struct {
 	int dirty;
 	int lru;
 	int tag;
+	int isLoading;
 	int* block;
+	BlockState blockState;
 } MultiWayCacheEntry;
 
 typedef struct {
@@ -32,8 +41,26 @@ typedef struct {
 } L2Cache;
 
 void InitCaches(ConfigurationStruct* cs);
-//Returns the level of cache needed to hit, 1 for l1, 2 for l2, 3 for Disk
-int LoadInstruction(int pc, ConfigurationStruct* cs);
+
+void DestroyCaches();
+
+double GetL1HitRate();
+
+double GetL2HitRate();
+
+int LoadWord();
+
+//note: should take care of isLoading field and BlockStatus Struct
+int DoWork();
+
+int PCtoAddress(int pc);
+
+int GetCacheEntryNumber(int address,int blockSize, int cacheLength);
+
+int GetOffset(int address,int blockSize, int cacheLength);
+
+int GetAddressTag(int address,int blockSize, int cacheLength);
+
 
 #endif
 

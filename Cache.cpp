@@ -4,8 +4,11 @@ L1Cache l1Cache;
 
 L2Cache l2Cache;
 
+ConfigurationStruct* confStruct;
+
 void InitCaches(ConfigurationStruct* cs) 
 {
+	//L1 init
 	int entriesNumber = (cs->l1_cache_size)/(cs->l1_block_size);
 	l1Cache.cache = new DirectMappedCacheEntry[entriesNumber];
 	memset(l1Cache.cache, 0 , entriesNumber * sizeof(DirectMappedCacheEntry));
@@ -16,6 +19,7 @@ void InitCaches(ConfigurationStruct* cs)
 		l1Cache.cache[i].block = new int[l1Cache.blockSize/sizeof(int)];
 	}
 
+	//L2 init
 	entriesNumber = ((cs->l2_cache_size)/(ASSOCIATIVITY))/(cs->l2_block_size);
 	l2Cache.cache = new MultiWayCacheEntry*[entriesNumber];
 
@@ -29,49 +33,45 @@ void InitCaches(ConfigurationStruct* cs)
 			l2Cache.cache[i][j].block = new int[l2Cache.blockSize/sizeof(int)];
 		}
 	}
+	confStruct = cs;
+}
+
+int IsWordReadyInBlock(int wordOffset,int blockSize, BlockState* bs)
+{
+	int wordNum = wordOffset / sizeof(int);
+	if ((((bs->wordStartedOn) + (bs->wordsGotten))%(blockSize/4)) >= wordNum) {
+		return 1;
+	}
+	return 0;
+}
+
+int GetWordFromBlock(int wordOffset, int* block) 
+{
+	int wordNum = wordOffset/sizeof(int);
+	return block[wordNum];
+
 }
 
 int LoadWord(int address,int* word)
 {
-	
-}
-
-int FetchWordL1(int address,int* word) 
-{
+	//check for it on L1
+	int cyclesSoFar = 1;
 	int entryNum = GetCacheEntryNumber(address,l1Cache.blockSize,l1Cache.cacheLength);
-	int tag = GetAddressTag(address,l1Cache.blockSize,l1Cache.cacheLength);
-	if (l1Cache.cache[entryNum].tag == tag && l1Cache.cache[entryNum].valid) {
-		*word = l1Cache.cache[entryNum].block[GetOffset(address,l1Cache.blockSize,l1Cache.cacheLength)];
-		return 1;
-	}
-
-	if (FetchWordL2(address,word,ASSOCIATIVITY) > 1) {
-		//set valid. set word
-		return 3;
-	}
-	return 2;
-
-
-}
-
-int FetchWordL2(int address,int* word, int associativity)
-{
-	int offset = GetOffset(address,l2Cache.blockSize,l2Cache.cacheLength);
-	int tag = GetAddressTag(address,l2Cache.blockSize,l2Cache.cacheLength);
-	int entryNum = GetCacheEntryNumber(address,l2Cache.blockSize,l2Cache.cacheLength);
-	int wasFound = -1;
-	for (int i = 0; i < associativity; i++) {
-		l2Cache.cache[entryNum][i].lru = 0;
-		if (l2Cache.cache[entryNum][i].valid && l2Cache.cache[entryNum][i].tag == tag) {
-			*word = l2Cache.cache[entryNum][i].block[offset];
-			l2Cache.cache[entryNum][i].lru = 1;
-			wasFound = i;
+	if (l1Cache.cache[entryNum].valid) {
+		if (l1Cache.cache[entryNum].tag==GetAddressTag(address,l1Cache.blockSize,l1Cache.cacheLength)) {
+			while(!IsWordReadyInBlock()) {
+				DoWork();
+			}
+			GetWordFromBlock(GetOffset(address,l1Cache.blockSize,l1Cache.cacheLength),
 		}
+
+
 	}
-	if (wasFound==-1) {
-		FetchBlockFromDisk(
-	}
+	//check for it on L2 if not present
+
+	//get it from Disk
 }
+
 
 
 int PCtoAddress(int pc)

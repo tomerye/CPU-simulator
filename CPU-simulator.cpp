@@ -77,7 +77,6 @@ void WriteExceutionTime(char *file_name)
 	return;
 }
 
-
 void WriteInstructionCount(char *file_name)
 {
 	FILE *file=fopen(file_name,"w");
@@ -95,7 +94,6 @@ void WriteInstructionCount(char *file_name)
 
 }
 
-
 //for string "$1" return int 1
 int GetRegNumberFromString(std::string reg)
 {
@@ -107,9 +105,6 @@ int GetRegNumberFromString(std::string reg)
 
 	return atoi(reg.c_str()+1);//convert to int after the $ sign
 }
-
-
-
 
 int MyAtoi(std::string str)
 {
@@ -125,8 +120,7 @@ int MyAtoi(std::string str)
 	return value;
 }
 
-
-//return the strnig that in "(" ")" as int
+//return the string that in "(" ")" as int
 int GetOffset(std::string s)
 {
 	size_t start,end;
@@ -142,7 +136,7 @@ void StartSimulator()
 	std::vector<std::string> current_instruction;
 	int r0,r1,r2,res;
 
-	reg[0]=0;//make reg 0 alwayes 0
+	reg[0]=0;//make reg 0 always 0
 
 	while(1)
 	{
