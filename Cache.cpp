@@ -57,15 +57,15 @@ int LoadWord(int address,int* word)
 	//check for it on L1
 	int cyclesSoFar = 1;
 	int entryNum = GetCacheEntryNumber(address,l1Cache.blockSize,l1Cache.cacheLength);
+	int wordOffset = GetOffset(address,l1Cache.blockSize,l1Cache.cacheLength);
 	if (l1Cache.cache[entryNum].valid) {
 		if (l1Cache.cache[entryNum].tag==GetAddressTag(address,l1Cache.blockSize,l1Cache.cacheLength)) {
-			while(!IsWordReadyInBlock()) {
+			while(!IsWordReadyInBlock(wordOffset,l1Cache.blockSize,&(l1Cache.cache[entryNum].blockState))) {
 				DoWork();
+				cyclesSoFar++;
 			}
-			GetWordFromBlock(GetOffset(address,l1Cache.blockSize,l1Cache.cacheLength),
+			*word = GetWordFromBlock(GetOffset(address,l1Cache.blockSize,l1Cache.cacheLength),l1Cache.cache[entryNum].block);
 		}
-
-
 	}
 	//check for it on L2 if not present
 
