@@ -56,18 +56,30 @@ int LoadWord(int address,int* word)
 {
 	//check for it on L1
 	int cyclesSoFar = 1;
+	int miss = 0;
 	int entryNum = GetCacheEntryNumber(address,l1Cache.blockSize,l1Cache.cacheLength);
-	int wordOffset = GetOffset(address,l1Cache.blockSize,l1Cache.cacheLength);
+	int wordOffsetL1 = GetOffset(address,l1Cache.blockSize,l1Cache.cacheLength);
 	if (l1Cache.cache[entryNum].valid) {
-		if (l1Cache.cache[entryNum].tag==GetAddressTag(address,l1Cache.blockSize,l1Cache.cacheLength)) {
-			while(!IsWordReadyInBlock(wordOffset,l1Cache.blockSize,&(l1Cache.cache[entryNum].blockState))) {
-				DoWork();
-				cyclesSoFar++;
+		if (l1Cache.cache[entryNum].tag == GetAddressTag(address,l1Cache.blockSize,l1Cache.cacheLength)) {
+			if (IsWordReadyInBlock(wordOffsetL1,l1Cache.blockSize,&(l1Cache.cache[entryNum].blockState))) {
+				//hit
+				l1Cache.hits++;
+			} else {
+				//miss but block is loading
+				l1Cache.misses++;
+				//wait for the word we want to load
+				while(!IsWordReadyInBlock(wordOffsetL1,l1Cache.blockSize,&(l1Cache.cache[entryNum].blockState))) {
+					DoWork();
+					cyclesSoFar++;
+				}
 			}
-			*word = GetWordFromBlock(GetOffset(address,l1Cache.blockSize,l1Cache.cacheLength),l1Cache.cache[entryNum].block);
+			*word = GetWordFromBlock(wordOffsetL1,l1Cache.cache[entryNum].block);
+			return cyclesSoFar;
 		}
 	}
-	//check for it on L2 if not present
+
+	//check for it on L2
+
 
 	//get it from Disk
 }

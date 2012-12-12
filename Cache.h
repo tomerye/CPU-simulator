@@ -32,12 +32,16 @@ typedef struct {
 	DirectMappedCacheEntry* cache;
 	int cacheLength;
 	int blockSize;
+	int hits;
+	int misses;
 } L1Cache;
 
 typedef struct {
 	MultiWayCacheEntry** cache;
 	int cacheLength;
 	int blockSize;
+	int hits;
+	int misses;
 } L2Cache;
 
 void InitCaches(ConfigurationStruct* cs);
