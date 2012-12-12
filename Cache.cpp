@@ -56,29 +56,57 @@ int LoadWord(int address,int* word)
 {
 	//check for it on L1
 	int cyclesSoFar = 1;
-	int miss = 0;
-	int entryNum = GetCacheEntryNumber(address,l1Cache.blockSize,l1Cache.cacheLength);
+	int entryNumL1 = GetCacheEntryNumber(address,l1Cache.blockSize,l1Cache.cacheLength);
 	int wordOffsetL1 = GetOffset(address,l1Cache.blockSize,l1Cache.cacheLength);
-	if (l1Cache.cache[entryNum].valid) {
-		if (l1Cache.cache[entryNum].tag == GetAddressTag(address,l1Cache.blockSize,l1Cache.cacheLength)) {
-			if (IsWordReadyInBlock(wordOffsetL1,l1Cache.blockSize,&(l1Cache.cache[entryNum].blockState))) {
-				//hit
+	if (l1Cache.cache[entryNumL1].valid) {
+		if (l1Cache.cache[entryNumL1].tag == GetAddressTag(address,l1Cache.blockSize,l1Cache.cacheLength)) {
+			if (IsWordReadyInBlock(wordOffsetL1,l1Cache.blockSize,&(l1Cache.cache[entryNumL1].blockState))) {
+				//hit on l1
 				l1Cache.hits++;
 			} else {
 				//miss but block is loading
 				l1Cache.misses++;
 				//wait for the word we want to load
-				while(!IsWordReadyInBlock(wordOffsetL1,l1Cache.blockSize,&(l1Cache.cache[entryNum].blockState))) {
+				while(!IsWordReadyInBlock(wordOffsetL1,l1Cache.blockSize,&(l1Cache.cache[entryNumL1].blockState))) {
 					DoWork();
 					cyclesSoFar++;
 				}
 			}
-			*word = GetWordFromBlock(wordOffsetL1,l1Cache.cache[entryNum].block);
+			*word = GetWordFromBlock(wordOffsetL1,l1Cache.cache[entryNumL1].block);
 			return cyclesSoFar;
 		}
 	}
-
+	//l1 missed
+	l1Cache.misses++;
+	cyclesSoFar = confStruct->l2_access_delay;
 	//check for it on L2
+	int entryNumL2 = GetCacheEntryNumber(address,l2Cache.blockSize,l2Cache.cacheLength);
+	int addressTagL2 = GetAddressTag(address,l2Cache.blockSize,l2Cache.cacheLength);
+	int wordOffsetL2 = GetOffset(address,l2Cache.blockSize,l2Cache.cacheLength);
+	for (int i = 0 ; i < ASSOCIATIVITY; i++) {
+		if (l2Cache.cache[entryNumL2][i].valid && l2Cache.cache[entryNumL2][i].tag == addressTagL2) {
+			if (IsWordReadyInBlock(wordOffsetL2,l2Cache.blockSize,&(l2Cache.cache[entryNumL2][i].blockState))) {
+				//hit on l2
+				l2Cache.hits++;
+			} else {
+				//miss but block is loading
+				l2Cache.misses++;
+				//wait for the word we want to load
+				while (!IsWordReadyInBlock(wordOffsetL2,l2Cache.blockSize,&(l2Cache.cache[entryNumL2][i].blockState))) {
+					DoWork();
+					cyclesSoFar++; // TODO: HOW MANY CYCLES??
+				}
+			}
+			*word = GetWordFromBlock(wordOffsetL2,l2Cache.cache[entryNumL2][i].block);
+			SetLRU();
+			LoadToL1(); //DONT FORGET TO SET VALID BIT
+			return cyclesSoFar;
+		}
+	}
+	//L2 Totally missed
+
+
+	//TODO: CONTINUE FROM HERE
 
 
 	//get it from Disk
