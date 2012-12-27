@@ -52,7 +52,11 @@ double GetL1HitRate();
 
 double GetL2HitRate();
 
-int LoadWord();
+/* Loads a word from memory
+returns number of cycles till word arrvied and the word loaded
+*/
+
+int LoadWord(int address,int* word);
 
 //note: should take care of isLoading field and BlockStatus Struct
 int DoWork();
@@ -65,6 +69,7 @@ int GetOffset(int address,int blockSize, int cacheLength);
 
 int GetAddressTag(int address,int blockSize, int cacheLength);
 
+void SetLRU(int blockNum,MultiWayCacheEntry* line);
 
 #endif
 
