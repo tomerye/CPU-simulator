@@ -13,8 +13,7 @@ int line_counter;
 std::map<std::string,int> lables_map;
 //pc register
 int pc=0;
-//the ram
-int ram[MEMORY_SIZE];
+
 //the registers
 int reg[NUMBER_OF_REGISTERS];
 

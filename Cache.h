@@ -58,8 +58,8 @@ returns number of cycles till word arrvied and the word loaded
 
 int LoadWord(int address,int* word);
 
-//note: should take care of isLoading field and BlockStatus Struct
-int DoWork();
+//note: should take care of BlockStatus Struct
+void DoWork();
 
 int PCtoAddress(int pc);
 

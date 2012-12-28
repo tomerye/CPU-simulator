@@ -34,11 +34,12 @@ typedef struct ConfigurationStruct_
 
 #define	NUMBER_OF_REGISTERS 32
 
-#define MEMORY_SIZE 65536
+#define MEMORY_SIZE 0x00F00000
 
 #define MAX_LINE_SIZE 50
 
-
+//the ram/disk
+int ram[MEMORY_SIZE];
 //write registers value to file
 int WriteRegisterDumpToFile(char *file_name);
 //write memory value to file

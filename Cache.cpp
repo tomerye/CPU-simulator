@@ -49,7 +49,6 @@ int GetWordFromBlock(int wordOffset, int* block)
 {
 	int wordNum = wordOffset/sizeof(int);
 	return block[wordNum];
-
 }
 
 void SetLRU(int lastUsedBlockNum,MultiWayCacheEntry* line)
@@ -60,10 +59,63 @@ void SetLRU(int lastUsedBlockNum,MultiWayCacheEntry* line)
 	line[lastUsedBlockNum].lru = 1;
 }
 
+//Loads a block to L1 cache (used by l2 / ram)
+void LoadToL1(int address,int* block)
+{
+	int offset = GetOffset(address,l1Cache.blockSize,l1Cache.cacheLength);
+	int tag = GetAddressTag(address,l1Cache.blockSize,l1Cache.cacheLength);
+	int entryNumber = GetCacheEntryNumber(address,l1Cache.blockSize,l1Cache.cacheLength);
+	DirectMappedCacheEntry* cacheEntry = &(l1Cache.cache[entryNumber]);
+	cacheEntry->tag = tag;
+	cacheEntry->valid = 1;
+	int l2Offset = GetOffset(address,l2Cache.blockSize,l2Cache.cacheLength);
+	int wordsInL2Block = l2Cache.blockSize/sizeof(int);
+	int wordsInL1Block = l1Cache.blockSize/sizeof(int);
+	memcpy(cacheEntry->block,block+((l2Offset/wordsInL1Block)*(wordsInL2Block/wordsInL1Block)),l1Cache.blockSize);
+	cacheEntry->blockState.wordsGotten = 1;
+	cacheEntry->blockState.wordStartedOn = l2Offset/wordsInL1Block;
+}
+
+
+void LoadToL2(int address, int* block)
+{
+	int offset = GetOffset(address,l2Cache.blockSize,l2Cache.cacheLength);
+	int tag = GetAddressTag(address,l2Cache.blockSize,l2Cache.cacheLength);
+	int lineNumber = GetCacheEntryNumber(address,l2Cache.blockSize,l2Cache.cacheLength);
+	MultiWayCacheEntry* line = l2Cache.cache[lineNumber];
+	int i;
+	for (i = 0; i < ASSOCIATIVITY; i++) {
+		if (line[i].valid == 0)
+			break;
+	}
+	if (line[i].valid) {
+		for (i = 0; i < ASSOCIATIVITY; i++) {
+			if (!line[i].lru)
+				break;
+		}
+	}
+	SetLRU(i,line);
+	line[i].dirty = 0;
+	line[i].valid = 1;
+	line[i].tag = tag;
+	line[i].blockState.wordsGotten = 1;
+	line[i].blockState.wordStartedOn = offset;
+	memcpy(line[i].block,block,l2Cache.blockSize);
+}
+
+void GetBlockFromMem(int address,int blockSize,int* block)
+{
+	int wordAddress = address/sizeof(int);
+	int blockAddress = wordAddress/(blockSize/4);
+	memcpy(block,ram+blockAddress,blockSize);
+}
+
 int LoadWord(int address,int* word)
 {
 	//check for it on L1
-	int cyclesSoFar = 1;
+	int cyclesSoFar = confStruct->l1_access_delay;
+	for (int i = 0; i < confStruct->l1_access_delay; i++)
+		DoWork();
 	int entryNumL1 = GetCacheEntryNumber(address,l1Cache.blockSize,l1Cache.cacheLength);
 	int wordOffsetL1 = GetOffset(address,l1Cache.blockSize,l1Cache.cacheLength);
 	if (l1Cache.cache[entryNumL1].valid) {
@@ -89,7 +141,11 @@ int LoadWord(int address,int* word)
 	}
 	//l1 missed
 	l1Cache.misses++;
-	cyclesSoFar = confStruct->l2_access_delay;
+	cyclesSoFar += confStruct->l2_access_delay;
+
+	for (int i = 0; i < confStruct->l2_access_delay; i++)
+		DoWork();
+
 	//check for it on L2
 	int entryNumL2 = GetCacheEntryNumber(address,l2Cache.blockSize,l2Cache.cacheLength);
 	int addressTagL2 = GetAddressTag(address,l2Cache.blockSize,l2Cache.cacheLength);
@@ -116,15 +172,17 @@ int LoadWord(int address,int* word)
 		}
 	}
 	//L2 Totally missed
-
-
-	//TODO: CONTINUE FROM HERE
-
-
-	//get it from Disk
+	l2Cache.misses++;
+	cyclesSoFar += confStruct->mem_access_delay;
+	for (int i = 0; i< confStruct->mem_access_delay; i++)
+		DoWork();
+	int* block = new int[l2Cache.blockSize];
+	GetBlockFromMem(address,l2Cache.blockSize,block);
+	LoadToL2(address,block);
+	LoadToL1(address,block);
+	*word = ram[address/sizeof(int)];
+	return cyclesSoFar;
 }
-
-
 
 int PCtoAddress(int pc)
 {
@@ -158,18 +216,6 @@ int GetAddressTag(int address,int blockSize, int cacheLength)
 	return (address >> ((int)log((double)cacheLength) + (int)log((double)blockSize)));
 }
 
-//Loads a block to L1 cache (used by l2 / ram)
-void LoadToL1(int address,int* block)
-{
-
-}
-
-void LoadToL2(int address, int* block)
-{
-
-}
-
-
 //TODO: WHAT HAPPENS WHEN DESTROYING AND CACHES STILL GOT WORK TO DO
 void DestroyCaches()
 {
@@ -184,7 +230,6 @@ void DestroyCaches()
 	}
 	delete[] l1Cache.cache;
 
-	
 	//destroying L2 cache
 	int l2EntriesNumber = ((confStruct->l2_cache_size)/(ASSOCIATIVITY))/(confStruct->l2_block_size);
 	for (int i = 0; i < l2EntriesNumber; i++) {
@@ -194,8 +239,31 @@ void DestroyCaches()
 		delete[] l2Cache.cache[i];
 	}
 	delete[] l2Cache.cache;
-
-	
 }
 
-	
+void DoWork() {
+	//Do work in l1 cache
+	BlockState* bs;
+	for (int i = 0; i < l1Cache.cacheLength; i++) {
+		if (!l1Cache.cache[i].valid)
+			continue;
+		bs = &(l1Cache.cache[i].blockState);
+		//The last word is ready in block
+		if (!IsWordReadyInBlock((bs->wordStartedOn-1)%l1Cache.blockSize,l1Cache.blockSize,bs)) {
+			bs->wordsGotten++;
+		}
+		break;	
+	}
+	//Do work in l2 cache
+	for (int i = 0; i < l2Cache.cacheLength; i++) {
+		for (int j = 0; j < ASSOCIATIVITY) {
+			if (!l2Cache.cache[i][j].valid)
+				continue;
+			bs = &(l2Cache.cache[i][j].blockState);
+			if (!IsWordReadyInBlock((bs->wordStartedOn-1)%l2Cache.blockSize,l2Cache.blockSize,bs)) {
+				bs->wordsGotten++;
+				return;
+			}
+		}
+	}
+}
