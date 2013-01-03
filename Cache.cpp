@@ -59,6 +59,11 @@ void SetLRU(int lastUsedBlockNum,MultiWayCacheEntry* line)
 	line[lastUsedBlockNum].lru = 1;
 }
 
+void SetDirty(int assoNum,MultiWayCacheEntry* line)
+{
+	line[assoNum].dirty = 1;		
+}
+
 //Loads a block to L1 cache (used by l2 / ram)
 void LoadToL1(int address,int* block)
 {
@@ -75,7 +80,6 @@ void LoadToL1(int address,int* block)
 	cacheEntry->blockState.wordsGotten = 1;
 	cacheEntry->blockState.wordStartedOn = l2Offset/wordsInL1Block;
 }
-
 
 void LoadToL2(int address, int* block)
 {
@@ -178,9 +182,45 @@ int LoadWord(int address,int* word)
 		DoWork();
 	int* block = new int[l2Cache.blockSize];
 	GetBlockFromMem(address,l2Cache.blockSize,block);
+	//NEED TO WRITE TO MEM IF L2 IS DIRTY
 	LoadToL2(address,block);
 	LoadToL1(address,block);
 	*word = ram[address/sizeof(int)];
+	return cyclesSoFar;
+}
+
+//This and the next are assuming the block is already present in (both) caches
+void WriteToL1(int address,int word) 
+{
+	int offset = GetOffset(address,l1Cache.blockSize,l1Cache.cacheLength);
+	int line = GetCacheEntryNumber(address,l1Cache.blockSize,l1Cache.cacheLength);
+	l1Cache.cache[line].block[offset]=word;
+}
+
+void WriteToL2(int address,int word) 
+{
+	int offset = GetOffset(address,l2Cache.blockSize,l2Cache.cacheLength);
+	int line = GetCacheEntryNumber(address,l2Cache.blockSize,l2Cache.cacheLength);
+	int tag = GetAddressTag(address,l2Cache.blockSize,l2Cache.cacheLength);
+	int i;
+	for (i = 0; i < ASSOCIATIVITY; i++) {
+		if (tag == l2Cache.cache[line][i]->tag)
+			break;
+	}
+	SetLRU(i,l2Cache.cache[line]);
+	SetDirty(i,l2Cache.cache[line]);
+	l2Cache.cache[line][i].block[offset] = word;
+
+}
+
+int StoreWord(int address,int* word) 
+{
+	int cyclesSoFar = 0;
+	int wordToStore = *word;
+	cyclesSoFar += LoadWord(address,word);
+	WriteToL1(address,wordToStore);
+	cyclesSoFar += confStruct -> l2_access_delay;
+	WriteToL2(address,wordToStore);
 	return cyclesSoFar;
 }
 
