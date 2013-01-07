@@ -39,6 +39,8 @@ typedef struct ConfigurationStruct_
 
 
 
+//the ram/disk
+int* ram;
 //write registers value to file
 int WriteRegisterDumpToFile(char *file_name);
 //write memory value to file

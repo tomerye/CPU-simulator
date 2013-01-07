@@ -5,8 +5,6 @@
 #include "stdafx.h"
 
 
-//the ram/disk
-int ram[MEMORY_SIZE/4];
 //this is vector of vector thar contain the cmd line that been parsed.
 std::vector<std::vector<std::string>> commands_vector;
 //this var contain the number of line beeing parsed during the read of the cmd file
@@ -40,6 +38,8 @@ int _tmain(int argc, char* argv[])
 		exit(1);
 	}
 
+	ram = new int[MEMORY_SIZE/4];
+
 	ReadMemInitFile(argv[3]);
 
 	ParseCMDfile(argv[1]);
@@ -69,6 +69,10 @@ int _tmain(int argc, char* argv[])
 	WriteL2CacheToFile(argv[12]);
 	
 	printf("all results written to files!\n");
+
+	DestroyCaches();
+
+	delete[] ram;
 
 	return 0;
 }
