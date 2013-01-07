@@ -6,6 +6,8 @@ L2Cache l2Cache;
 
 ConfigurationStruct* confStruct;
 
+extern int* ram;
+
 void InitCaches(ConfigurationStruct* cs) 
 {
 	//L1 init
@@ -204,7 +206,7 @@ void WriteToL2(int address,int word)
 	int tag = GetAddressTag(address,l2Cache.blockSize,l2Cache.cacheLength);
 	int i;
 	for (i = 0; i < ASSOCIATIVITY; i++) {
-		if (tag == l2Cache.cache[line][i]->tag)
+		if (tag == l2Cache.cache[line][i].tag)
 			break;
 	}
 	SetLRU(i,l2Cache.cache[line]);
@@ -296,7 +298,7 @@ void DoWork() {
 	}
 	//Do work in l2 cache
 	for (int i = 0; i < l2Cache.cacheLength; i++) {
-		for (int j = 0; j < ASSOCIATIVITY) {
+		for (int j = 0; j < ASSOCIATIVITY; j++) {
 			if (!l2Cache.cache[i][j].valid)
 				continue;
 			bs = &(l2Cache.cache[i][j].blockState);
@@ -306,4 +308,89 @@ void DoWork() {
 			}
 		}
 	}
+}
+
+void WriteWordToFile(FILE* file,int* word) {
+		
+		fprintf(file,"%02x ",(*(word))&0xFF);
+		fprintf(file,"%02x ",((*word)>>8)&0xFF);
+		fprintf(file,"%02x ",((*word)>>16)&0xFF);
+		fprintf(file,"%02x ",((*word)>>24)&0xFF);
+	
+	return;
+}
+
+void WriteL1CacheToFile(char* filename) 
+{
+	FILE *file=fopen(filename,"w");
+
+	if (file==NULL)
+	{
+		printf("error in write l1 cache dump\n %s %s ",__FILE__,__LINE__);
+		exit(1);
+	}
+
+	int* block;
+	for (int i=0; i < l1Cache.cacheLength; i++) {
+		block = l1Cache.cache[i].block;
+		for (int j = 0; j < l1Cache.blockSize/4; j++) {
+			block = block + j;
+			WriteWordToFile(file,block);
+			WriteWordToFile(file,block);
+			fseek(file,-1,SEEK_CUR);
+			fprintf(file,"\n");
+		}
+	}
+
+	fclose(file);
+}
+
+void WriteL2CacheToFile(char* filename) 
+{
+	FILE *file=fopen(filename,"w");
+
+	if (file==NULL)
+	{
+		printf("error in write l2 cache dump\n %s %s ",__FILE__,__LINE__);
+		exit(1);
+	}
+
+	int* block;
+	for (int i = 0; i < l2Cache.cacheLength; i++) {
+		for (int k = 0; k < ASSOCIATIVITY; k++) {
+			block = l2Cache.cache[i][k].block;
+			for (int j = 0; j < l2Cache.blockSize/4; j++) {
+				block = block + j;
+				WriteWordToFile(file,block);
+				WriteWordToFile(file,block);
+				fseek(file,-1,SEEK_CUR);
+				fprintf(file,"\n");
+			}
+		}
+	}
+
+	fclose(file);
+}
+
+void WriteHitRatioAndAMAT(char* filename) {
+	FILE *file=fopen(filename,"w");
+
+	if (file==NULL)
+	{
+		printf("error in write AMAT\n %s %s ",__FILE__,__LINE__);
+		exit(1);
+	}
+
+	double amat;
+	double l1Hitrate = l1Cache.hits/(l1Cache.hits+l1Cache.misses);
+	double l2Hitrate = l2Cache.hits/(l2Cache.hits+l2Cache.misses);
+	amat = (l1Hitrate*confStruct->l1_access_delay)+(1-l1Hitrate)
+		*(confStruct->l1_access_delay + l2Hitrate*(confStruct->l2_access_delay)+(1-l2Hitrate)
+		*(confStruct->l2_access_delay + confStruct->mem_access_delay));
+
+	fprintf(file,"L1 %d\n",(int)100*l1Hitrate);
+	fprintf(file,"L2 %d\n",(int)100*l2Hitrate);
+	fprintf(file,"AMAT %2d\n",amat);
+
+	fclose(file);
 }

@@ -5,6 +5,8 @@
 #include "stdafx.h"
 
 
+//the ram/disk
+int ram[MEMORY_SIZE/4];
 //this is vector of vector thar contain the cmd line that been parsed.
 std::vector<std::vector<std::string>> commands_vector;
 //this var contain the number of line beeing parsed during the read of the cmd file
@@ -24,7 +26,7 @@ int executetime;
 
 int _tmain(int argc, char* argv[])
 {
-//cmd_file.txt config_file.txt mem_init.txt regs_dump.txt mem_dump.txt time.txt committed.txt hitrate.txt L1i.txt L1d.txt L2i.txt L2d.txt
+//1cmd_file.txt 2config_file.txt 3mem_init.txt 4regs_dump.txt 5mem_dump.txt 6time.txt 7committed.txt 8hitrate.txt 9L1i.txt 10L1d.txt 11L2i.txt 12L2d.txt
 	ConfigurationStruct configuration;
 
 	if(argc!=13)
@@ -56,6 +58,16 @@ int _tmain(int argc, char* argv[])
 
 	WriteInstructionCount(argv[7]);
 
+	WriteHitRatioAndAMAT(argv[8]);
+
+	WriteL1CacheToFile(argv[9]);
+
+	WriteL1CacheToFile(argv[10]);
+
+	WriteL2CacheToFile(argv[11]);
+
+	WriteL2CacheToFile(argv[12]);
+	
 	printf("all results written to files!\n");
 
 	return 0;
@@ -145,6 +157,7 @@ void StartSimulator()
 		//simulate load instruction
 		executetime += LoadWord(PCtoAddress(pc),&desination);
 		executetime++;
+		DoWork();
 		instructioncount++;
 		if(current_instruction[1]=="halt")
 			return;
@@ -444,7 +457,7 @@ void ReadMemInitFile(char *file_name)
 		ram[i+1]=x[4]+(x[5]<<8)+(x[6]<<16)+(x[7]<<24);
 		i+=2;
 	}
-	for (int i = (0x00F00000)/4; i < (0xFFFFFFFF/4); i++) {
+	for (int i = (0x00F00000/4); i < (MEMORY_SIZE/4); i++) {
 		ram[i] = i*4;
 	}
 }
@@ -475,7 +488,6 @@ void ParseLine(char *lineBuffer)
 	std::string tmp(lineBuffer);
 	std::string lable,cmd,rs,r0,r1,jump_lable;
 	std::vector<std::string> instruction;
-	int result;
 	size_t start=0,end=0;
 	tmp.append("#");//mark end of line
 	if(tmp.find_first_of(':',0)==std::string::npos)//regular line start with #

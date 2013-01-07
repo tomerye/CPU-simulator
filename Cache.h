@@ -1,7 +1,7 @@
-#include "CPU-simulator.h"
+#ifndef _CACHE_H
+#define _CACHE_H
 
-#ifndef CACHE_H
-#define CACHE_H
+#include "stdafx.h"
 
 #define ASSOCIATIVITY 2
 
@@ -72,11 +72,11 @@ int GetAddressTag(int address,int blockSize, int cacheLength);
 
 void SetLRU(int blockNum,MultiWayCacheEntry* line);
 
-void WriteL1CacheToFile();
+void WriteL1CacheToFile(char* filename);
 
-void WriteL2CacheToFile();
+void WriteL2CacheToFile(char* filename);
 
-void WriteHitRatioAndAMAT();
+void WriteHitRatioAndAMAT(char* filename);
 
 #endif
 

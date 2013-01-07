@@ -13,9 +13,10 @@
 #include <string.h>
 
 
-#include "Cache.h"
-#include "CPU-simulator.h"
 #include "ini.h"
+
+#include "CPU-simulator.h"
+#include "Cache.h"
 
 
 // TODO: reference additional headers your program requires here
