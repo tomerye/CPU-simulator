@@ -58,6 +58,7 @@ returns number of cycles till word arrvied and the word loaded
 
 int LoadWord(int address,int* word);
 
+int StoreWord(int address,int* word);
 //note: should take care of BlockStatus Struct
 void DoWork();
 
@@ -70,6 +71,12 @@ int GetOffset(int address,int blockSize, int cacheLength);
 int GetAddressTag(int address,int blockSize, int cacheLength);
 
 void SetLRU(int blockNum,MultiWayCacheEntry* line);
+
+void WriteL1CacheToFile();
+
+void WriteL2CacheToFile();
+
+void WriteHitRatioAndAMAT();
 
 #endif
 

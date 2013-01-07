@@ -21,9 +21,10 @@ int reg[NUMBER_OF_REGISTERS];
 int instructioncount;
 //counter for the excution time
 int executetime;
-//cmd_file.txt config_file.txt mem_init.txt regs_dump.txt mem_dump.txt time.txt committed.txt hitrate.txt L1i.txt L1d.txt L2i.txt L2d.txt
+
 int _tmain(int argc, char* argv[])
 {
+//cmd_file.txt config_file.txt mem_init.txt regs_dump.txt mem_dump.txt time.txt committed.txt hitrate.txt L1i.txt L1d.txt L2i.txt L2d.txt
 	ConfigurationStruct configuration;
 
 	if(argc!=13)
@@ -133,14 +134,16 @@ int GetOffset(std::string s)
 void StartSimulator()
 {
 	std::vector<std::string> current_instruction;
-	int r0,r1,r2,res;
+	int r0,r1,r2,res,desination;
 
 	reg[0]=0;//make reg 0 always 0
 
 	while(1)
 	{
-		current_instruction=commands_vector[pc];
 		
+		current_instruction=commands_vector[pc];
+		//simulate load instruction
+		executetime += LoadWord(PCtoAddress(pc),&desination);
 		executetime++;
 		instructioncount++;
 		if(current_instruction[1]=="halt")
@@ -252,8 +255,8 @@ void StartSimulator()
 		{
 			r0=GetRegNumberFromString(current_instruction[2]);
 			res=GetOffset(current_instruction[3]);
-			r1=GetRegNumberFromString(current_instruction[3].substr(current_instruction[3].find_first_of(")"),std::string::npos));
-			reg[r0]=ram[reg[r1]/4+res/4];
+			r1=GetRegNumberFromString(current_instruction[3].substr(current_instruction[3].find_first_of(")")+1,std::string::npos));
+			executetime += LoadWord((reg[r1]+res)/4,&reg[r0]);
 			pc++;
 			continue;
 		}
@@ -262,7 +265,7 @@ void StartSimulator()
 			r0=GetRegNumberFromString(current_instruction[2]);
 			res=GetOffset(current_instruction[3]);
 			r1=GetRegNumberFromString(current_instruction[3].substr(current_instruction[3].find_first_of(")")+1,std::string::npos));
-			ram[reg[r1]/4+res/4]=reg[r0];
+			executetime += StoreWord((reg[r1]+res)/4,&reg[r0]);
 			pc++;
 			continue;
 		}
@@ -437,11 +440,13 @@ void ReadMemInitFile(char *file_name)
 			exit(1);
 		}
 
-		ram[i]=x[0]+x[1]<<8+x[2]<<16+x[3]<<24;
-		ram[i+1]=x[4]+x[5]<<8+x[6]<<16+x[7]<<24;
+		ram[i]=x[0]+(x[1]<<8)+(x[2]<<16)+(x[3]<<24);
+		ram[i+1]=x[4]+(x[5]<<8)+(x[6]<<16)+(x[7]<<24);
 		i+=2;
 	}
-
+	for (int i = (0x00F00000)/4; i < (0xFFFFFFFF/4); i++) {
+		ram[i] = i*4;
+	}
 }
 
 int ParseCMDfile(char *file_name)
