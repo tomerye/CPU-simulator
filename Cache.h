@@ -5,6 +5,8 @@
 
 #define ASSOCIATIVITY 2
 
+
+
 typedef struct {
 	int wordStartedOn;
 	int wordsGotten;

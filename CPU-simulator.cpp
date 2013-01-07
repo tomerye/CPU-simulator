@@ -14,6 +14,10 @@ std::map<std::string,int> lables_map;
 //pc register
 int pc=0;
 
+
+//the ram/disk
+int* ram = 0;
+
 //the registers
 int reg[NUMBER_OF_REGISTERS];
 
@@ -39,6 +43,8 @@ int _tmain(int argc, char* argv[])
 	}
 
 	ram = new int[MEMORY_SIZE/4];
+	if (ram == NULL)
+		exit(1);
 
 	ReadMemInitFile(argv[3]);
 
@@ -72,7 +78,7 @@ int _tmain(int argc, char* argv[])
 
 	DestroyCaches();
 
-	delete[] ram;
+	free(ram);
 
 	return 0;
 }
@@ -408,7 +414,7 @@ int WriteMemoryDumpToFile(char *file_name)
 		return 0;
 	}
 
-	for(i=0;i<MEMORY_SIZE;i++)
+	for(i=0; i<MEMORY_SIZE/4; i++)
 	{
 		fprintf(file,"%02x ",ram[i]&0xFF);
 		fprintf(file,"%02x ",(ram[i]>>8)&0xFF);

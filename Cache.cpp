@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+
 L1Cache l1Cache;
 
 L2Cache l2Cache;
@@ -19,6 +20,7 @@ void InitCaches(ConfigurationStruct* cs)
 
 	for (int i = 0; i < entriesNumber; i++) {
 		l1Cache.cache[i].block = new int[l1Cache.blockSize/sizeof(int)];
+
 	}
 
 	//L2 init
@@ -182,11 +184,12 @@ int LoadWord(int address,int* word)
 	cyclesSoFar += confStruct->mem_access_delay;
 	for (int i = 0; i< confStruct->mem_access_delay; i++)
 		DoWork();
-	int* block = new int[l2Cache.blockSize];
+	int* block = (int*)malloc(l2Cache.blockSize);
 	GetBlockFromMem(address,l2Cache.blockSize,block);
 	//NEED TO WRITE TO MEM IF L2 IS DIRTY
 	LoadToL2(address,block);
 	LoadToL1(address,block);
+	free(block);
 	*word = ram[address/sizeof(int)];
 	return cyclesSoFar;
 }
@@ -266,15 +269,13 @@ void DestroyCaches()
 	}
 	
 	//destroying L1 cache
-	int l1EntriesNumber = (confStruct->l1_cache_size)/(confStruct->l1_block_size);
-	for (int i = 0; i < l1EntriesNumber; i++) {
+	for (int i = 0; i < l1Cache.cacheLength; i++) {
 		delete[] l1Cache.cache[i].block;
 	}
 	delete[] l1Cache.cache;
 
 	//destroying L2 cache
-	int l2EntriesNumber = ((confStruct->l2_cache_size)/(ASSOCIATIVITY))/(confStruct->l2_block_size);
-	for (int i = 0; i < l2EntriesNumber; i++) {
+	for (int i = 0; i < l2Cache.cacheLength; i++) {
 		for (int j = 0; j < ASSOCIATIVITY; j++) {
 			delete[] l2Cache.cache[i][j].block;
 		}
