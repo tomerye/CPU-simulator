@@ -76,7 +76,7 @@ int _tmain(int argc, char* argv[])
 	
 	printf("all results written to files!\n");
 
-	DestroyCaches();
+//	DestroyCaches();
 
 	free(ram);
 

@@ -383,14 +383,14 @@ void WriteHitRatioAndAMAT(char* filename) {
 	}
 
 	double amat;
-	double l1Hitrate = l1Cache.hits/(l1Cache.hits+l1Cache.misses);
-	double l2Hitrate = l2Cache.hits/(l2Cache.hits+l2Cache.misses);
-	amat = (l1Hitrate*confStruct->l1_access_delay)+(1-l1Hitrate)
-		*(confStruct->l1_access_delay + l2Hitrate*(confStruct->l2_access_delay)+(1-l2Hitrate)
+	double l1Hitrate = (double)l1Cache.hits/(l1Cache.hits+l1Cache.misses);
+	double l2Hitrate = (double)l2Cache.hits/(l2Cache.hits+l2Cache.misses);
+	amat = (l1Hitrate*confStruct->l1_access_delay);
+	amat += (1-l1Hitrate)*(confStruct->l1_access_delay + l2Hitrate*(confStruct->l2_access_delay)+(1-l2Hitrate)
 		*(confStruct->l2_access_delay + confStruct->mem_access_delay));
 
-	fprintf(file,"L1 %d\n",(int)100*l1Hitrate);
-	fprintf(file,"L2 %d\n",(int)100*l2Hitrate);
+	fprintf(file,"L1 %d\n",(int)(100*l1Hitrate));
+	fprintf(file,"L2 %d\n",(int)(100*l2Hitrate));
 	fprintf(file,"AMAT %2d\n",amat);
 
 	fclose(file);
