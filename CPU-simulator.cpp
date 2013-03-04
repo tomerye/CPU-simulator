@@ -373,7 +373,11 @@ static int handler(void* user, const char* section, const char* name,
 	{
 		pconfig->mem_access_delay = atoi(value);
 	}
-	else 
+	else if (MATCH("","store_q_depth"))
+	{	
+		pconfig->store_q_depth = atoi(value);
+	}
+	else
 	{
 		return 0;  /* unknown section/name, error */
 	}

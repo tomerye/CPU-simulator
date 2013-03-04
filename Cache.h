@@ -5,14 +5,12 @@
 
 #define ASSOCIATIVITY 2
 
-
-
-typedef struct {
+typedef struct _BlockState {
 	int wordStartedOn;
 	int wordsGotten;
 } BlockState;
 
-typedef struct {
+typedef struct _DirectMappedCacheEntry {
 	int valid;
 	int tag;
 	int isLoading;
@@ -20,7 +18,7 @@ typedef struct {
 	BlockState blockState;
 } DirectMappedCacheEntry;
 
-typedef struct {
+typedef struct _MultiWayCacheEntry {
 	int valid;
 	int dirty;
 	int lru;
@@ -30,7 +28,7 @@ typedef struct {
 	BlockState blockState;
 } MultiWayCacheEntry;
 
-typedef struct {
+typedef struct _L1Cache {
 	DirectMappedCacheEntry* cache;
 	int cacheLength;
 	int blockSize;
@@ -38,7 +36,7 @@ typedef struct {
 	int misses;
 } L1Cache;
 
-typedef struct {
+typedef struct _L2Cache {
 	MultiWayCacheEntry** cache;
 	int cacheLength;
 	int blockSize;

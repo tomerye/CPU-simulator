@@ -18,6 +18,7 @@ typedef struct ConfigurationStruct_
 	int addsub_rs;
 	int muldiv_rs;
 	int load_q_depth;
+	int store_q_depth;
 	int reorder_buffer;
 	int ghr_width;
 	int two_threads_enabled;
@@ -28,7 +29,7 @@ typedef struct ConfigurationStruct_
 	int l2_access_delay;
 	int l2_cache_size;
 	int mem_access_delay;
-
+ 
 } ConfigurationStruct;
 
 #define	NUMBER_OF_REGISTERS 32
