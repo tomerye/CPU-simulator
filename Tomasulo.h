@@ -1,7 +1,7 @@
 #pragma once
 #include <queue>
 
-#define TRACEFILE "trace1.txt"
+#define TRACEFILE "trace0.txt"
 
 using namespace std;
 
@@ -27,9 +27,13 @@ public:
 		int load_q_depth);
 	~Tomasulo(void);
 
+	//add to instruction queue
 	bool addToQueue(vector<std::string>);
-	bool isFull();
-	void doWork();
+	bool isInstQueueFull();
+	//do one cycle work
+	void doWork();	
+	bool isRSFull(reservationEntry*,int);
+	bool isRSempty(reservationEntry*,int);
 
 private:
 	int pc;
@@ -54,5 +58,10 @@ private:
 	int muldiv_rs;
 	int load_q_depth;
 	int store_q_depth;
+
+	// issue instruction to rs. return false if rs is full
+	bool Tomasulo::issue(vector<string> curInst);
+
+
 };
 

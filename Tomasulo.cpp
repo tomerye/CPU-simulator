@@ -52,7 +52,7 @@ Tomasulo::~Tomasulo(void)
 
 bool Tomasulo::addToQueue(vector<std::string> newInstruction) 
 {
-	if (this->isFull()) {
+	if (this->isInstQueueFull()) {
 		return false;
 	}
 	else
@@ -65,5 +65,21 @@ bool Tomasulo::addToQueue(vector<std::string> newInstruction)
 
 void Tomasulo::doWork() 
 {
-	
+	if (!instructionsQueue.empty()) {
+		vector<string> currentInst = instructionsQueue.front();
+		if (issue(currentInst)) {
+			instructionsQueue.pop();
+		}
+	}
 }
+
+bool Tomasulo::issue(vector<string> curInst) 
+{
+
+}
+
+void doWorkForRS(reservationEntry rs, int rsSize) 
+{
+		
+}
+
