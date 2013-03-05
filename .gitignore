@@ -21,7 +21,11 @@ Thumbs.db
 *.bak
 *.cache
 *.ilk
+*.txt
 *.log
+*.vcxproj
+*.filters
+*.user
 [Bb]in
 [Dd]ebug*/
 *.lib
@@ -30,4 +34,4 @@ obj/
 [Rr]elease*/
 _ReSharper*/
 [Tt]est[Rr]esult*
-phase2_examples_2jan2013/
+phase3_examples_19jan2013/
