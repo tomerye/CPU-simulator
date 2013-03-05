@@ -26,18 +26,20 @@ int instructioncount;
 //counter for the excution time
 int executetime;
 
+ConfigurationStruct configuration;
+
 int _tmain(int argc, char* argv[])
 {
 //1cmd_file.txt 2config_file.txt 3mem_init.txt 4regs_dump.txt 5mem_dump.txt 6time.txt 7committed.txt 8hitrate.txt 9L1i.txt 10L1d.txt 11L2i.txt 12L2d.txt
-	ConfigurationStruct configuration;
+//1cmd_file1.txt 2cmd_file2.txt 3config_file.txt 4mem_init.txt 5regs_dump.txt 6mem_dump.txt 7time.txt 8committed.txt 9hitrate.txt 10trace1.txt 11trace2.txt
 
-	if(argc!=13)
+	if(argc!=12)
 	{
 		printf("Wrong number of command line arguments!\n");
 		exit(1);
 	}
 
-	if (ini_parse(argv[2], handler, &configuration) < 0) {
+	if (ini_parse(argv[3], handler, &configuration) < 0) {
 		printf("Can't load '%s' file\n",argv[1]);
 		exit(1);
 	}
@@ -46,33 +48,26 @@ int _tmain(int argc, char* argv[])
 	if (ram == NULL)
 		exit(1);
 
-	ReadMemInitFile(argv[3]);
+	ReadMemInitFile(argv[4]);
 
 	ParseCMDfile(argv[1]);
 
 	InitCaches(&configuration);
-	
+
 	StartSimulator();
 
 	printf("simulation done!\n");
 
-	WriteMemoryDumpToFile(argv[5]);
+	WriteMemoryDumpToFile(argv[6]);
 
-	WriteRegisterDumpToFile(argv[4]);
+	WriteRegisterDumpToFile(argv[5]);
 
-	WriteExceutionTime(argv[6]);
+	WriteExceutionTime(argv[7]);
 
-	WriteInstructionCount(argv[7]);
+	WriteInstructionCount(argv[8]);
 
-	WriteHitRatioAndAMAT(argv[8]);
+	WriteHitRatioAndAMAT(argv[9]);
 
-	WriteL1CacheToFile(argv[9]);
-
-	WriteL1CacheToFile(argv[10]);
-
-	WriteL2CacheToFile(argv[11]);
-
-	WriteL2CacheToFile(argv[12]);
 	
 	printf("all results written to files!\n");
 
@@ -158,6 +153,16 @@ void StartSimulator()
 	std::vector<std::string> current_instruction;
 	int r0,r1,r2,res,desination;
 
+	Tomasulo tomasulo(
+		configuration.addsub_delay,
+		configuration.mul_delay,
+		configuration.div_delay,
+		configuration.instruction_q_depth,
+		configuration.addsub_rs,
+		configuration.muldiv_rs,
+		configuration.load_q_depth,
+		configuration.store_q_depth);
+
 	reg[0]=0;//make reg 0 always 0
 
 	while(1)
@@ -167,6 +172,10 @@ void StartSimulator()
 		//simulate load instruction
 		executetime += LoadWord(PCtoAddress(pc),&desination);
 		executetime++;
+		if (!tomasulo.isInstQueueFull()) {
+			tomasulo.addToQueue(current_instruction);
+		}
+		tomasulo.doWork();
 		DoWork();
 		instructioncount++;
 		if(current_instruction[1]=="halt")

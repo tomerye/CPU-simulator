@@ -24,7 +24,8 @@ public:
 		int instruction_q_depth,
 		int addsub_rs,
 		int muldiv_rs,
-		int load_q_depth);
+		int load_q_depth,
+		int store_q_depth);
 	~Tomasulo(void);
 
 	//add to instruction queue
@@ -32,8 +33,7 @@ public:
 	bool isInstQueueFull();
 	//do one cycle work
 	void doWork();	
-	bool isRSFull(reservationEntry*,int);
-	bool isRSempty(reservationEntry*,int);
+	
 
 private:
 	int pc;
@@ -60,8 +60,12 @@ private:
 	int store_q_depth;
 
 	// issue instruction to rs. return false if rs is full
-	bool Tomasulo::issue(vector<string> curInst);
+	bool issue(vector<string> curInst);
 
+	int findOpenSpotInRS(reservationEntry*,int);
+
+	bool isRSFull(reservationEntry*,int);
+	bool isRSempty(reservationEntry*,int);
 
 };
 
